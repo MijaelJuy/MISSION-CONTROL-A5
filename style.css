@@ -891,3 +891,199 @@ body {
 .window.is-positioned {
   transform: none;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Intro Cinematográfica Anna OS — overlay GSAP + GIF (se elimina al terminar) */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  --anna-intro-accent: #7af7b3;
+}
+
+.anna-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  background: #000000;
+  color: #dfffe8;
+  font-family: var(--font-mono), "VT323", "Consolas", monospace;
+  overflow: hidden;
+  cursor: default;
+}
+
+.anna-intro--spacebg {
+  background: radial-gradient(ellipse 120% 100% at 50% 120%, #0d1833 0%, #03060e 52%, #000000 100%);
+}
+
+.anna-intro__flash {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: #ffffff;
+  opacity: 0;
+}
+
+.anna-intro__phase1 {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 3vh, 24px);
+  min-height: 100%;
+  width: 100%;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+.anna-intro__gif--dev {
+  display: block;
+  width: min(340px, 78vw);
+  max-height: min(52vh, 440px);
+  height: auto;
+  object-fit: contain;
+  box-shadow:
+    0 0 0 3px #1a2840,
+    6px 6px 0 #0f1828,
+    0 16px 40px rgba(0, 0, 0, 0.85);
+}
+
+.anna-intro__phase2 {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  opacity: 0;
+  visibility: hidden;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(30, 60, 120, 0.35) 0%, transparent 45%),
+    linear-gradient(180deg, #040a14 0%, #020510 65%, #000208 100%);
+}
+
+.anna-intro__stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 1;
+}
+
+.anna-intro__phase2.is-stars-visible .anna-intro__stars {
+  opacity: 1;
+}
+
+.anna-intro__star {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 0 2px rgba(255, 255, 255, 0.9),
+    0 0 6px rgba(160, 200, 255, 0.45);
+}
+
+.anna-intro__vignette {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: radial-gradient(ellipse 70% 62% at 50% 48%, transparent 38%, rgba(0, 0, 4, 0.72) 100%);
+  opacity: 0.5;
+}
+
+.anna-intro__rocket-mount {
+  position: absolute;
+  z-index: 4;
+  left: 6%;
+  bottom: 8%;
+  top: auto;
+  pointer-events: none;
+  will-change: transform, left, top, bottom;
+}
+
+.anna-intro__rocket-shake {
+  transform-origin: 50% 50%;
+}
+
+.anna-intro__gif--rocket {
+  display: block;
+  width: min(200px, 38vw);
+  height: auto;
+  object-fit: contain;
+  image-rendering: auto;
+}
+
+.anna-intro__gif--rocket--blend {
+  mix-blend-mode: screen;
+}
+
+.anna-intro__cta {
+  margin: 0;
+  max-width: min(920px, 94vw);
+  padding: 0 8px;
+  font-family: var(--font-pixel), "Press Start 2P", monospace;
+  font-size: clamp(0.48rem, 1.82vw, 0.62rem);
+  line-height: 1.92;
+  color: var(--anna-intro-accent);
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 10px rgba(90, 255, 180, 0.45),
+    2px 2px 0 #031008;
+}
+
+@keyframes anna-intro-blink {
+  0%,
+  42% {
+    opacity: 1;
+  }
+
+  50%,
+  92% {
+    opacity: 0.18;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.anna-intro__cta--blink {
+  animation: anna-intro-blink 2.25s ease-in-out infinite;
+}
+
+.anna-intro__climax {
+  position: absolute;
+  z-index: 40;
+  bottom: clamp(72px, 14vh, 120px);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(88vw, 560px);
+  margin: 0;
+  padding: 0 12px;
+  font-family: var(--font-pixel), "Press Start 2P", monospace;
+  font-size: clamp(0.55rem, 2.2vw, 0.74rem);
+  line-height: 2;
+  text-align: center;
+  white-space: pre-wrap;
+  color: #fff5fb;
+  text-shadow:
+    0 0 12px rgba(255, 200, 255, 0.35),
+    2px 2px 0 #2d1f3d;
+  min-height: 4em;
+  opacity: 0;
+  visibility: hidden;
+}
+
+html.anna-intro--active,
+html.anna-intro--active body {
+  overflow: hidden;
+}
+
+html.anna-intro--active body {
+  height: 100%;
+}

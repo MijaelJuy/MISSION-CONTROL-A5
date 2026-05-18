@@ -11,8 +11,50 @@
   <link rel="stylesheet" href="style.css" />
   <!-- ApexCharts: gráfico de velas Love Candles ($ANNA Tracker) -->
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <!-- GSAP: animación intro cinematográfica -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 </head>
 <body>
+  <!-- Intro cinemática (GSAP + GIF locales): overlay fijo → se elimina del DOM al finalizar -->
+  <div
+    id="anna-intro"
+    class="anna-intro"
+    aria-label="Introducción cinematográfica"
+    role="presentation"
+    tabindex="-1"
+  >
+    <div class="anna-intro__flash" id="anna-intro-flash" aria-hidden="true"></div>
+
+    <div class="anna-intro__phase1" id="anna-intro-phase1">
+      <img
+        src="programador.gif"
+        id="anna-intro-dev-img"
+        class="anna-intro__gif anna-intro__gif--dev"
+        alt=""
+      />
+      <p class="anna-intro__cta anna-intro__cta--blink" id="anna-intro-cta">
+        &gt; SISTEMAS LISTOS. PRESIONA ENTER PARA INICIAR SECUENCIA_
+      </p>
+    </div>
+
+    <div id="anna-intro-phase2" class="anna-intro__phase2" aria-hidden="true">
+      <div class="anna-intro__stars" id="anna-intro-stars"></div>
+      <div class="anna-intro__vignette"></div>
+      <div id="anna-intro-rocket-mount" class="anna-intro__rocket-mount">
+        <div id="anna-intro-rocket-shake" class="anna-intro__rocket-shake">
+          <img
+            src="cohete.gif"
+            id="anna-intro-rocket-img"
+            class="anna-intro__gif anna-intro__gif--rocket"
+            alt=""
+          />
+        </div>
+      </div>
+    </div>
+
+    <p class="anna-intro__climax" id="anna-intro-msg" aria-live="polite"></p>
+  </div>
+
   <!-- Escritorio: fondo + iconos -->
   <main class="desktop" id="desktop" aria-label="Escritorio Anna OS">
     <div
@@ -244,6 +286,7 @@ Te amo, Anna.</textarea>
     </div>
   </footer>
 
+  <script src="intro.js" defer></script>
   <script src="script.js" defer></script>
 </body>
 </html>
