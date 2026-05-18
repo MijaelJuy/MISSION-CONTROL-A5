@@ -1,5 +1,5 @@
 /**
- * Anna OS — Intro cinemática GSAP + programador.gif / cohete.gif
+ * Anna OS — Intro cinemática GSAP; cohete sólo SVG; opcional programador.gif
  * Overlay fijo sobre el escritorio; al terminar se elimina sin tocar Anna OS debajo.
  */
 (function () {

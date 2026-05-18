@@ -55,6 +55,47 @@
 
   let zStack = Z_INDEX.base;
 
+  /** ApexCharts Tracker (una sola instancia). */
+  let annaLoveChart = null;
+
+  /** Última altura aplicada al gráfico (evita bucles updateOptions ↔ layout). */
+  let lastLoveChartPixelHeight = -1;
+
+  function loveChartSafeHeightCeiling() {
+    return Math.min(720, Math.max(260, Math.floor(window.innerHeight * 0.7)));
+  }
+
+  /**
+   * Evita alturas absurdas (bucle flex + Apex) que “rompen” el eje Y o alargan el canvas.
+   * @param {number} raw
+   */
+  function clampLoveChartHeight(raw) {
+    const cap = loveChartSafeHeightCeiling();
+    let h = Math.round(Number(raw));
+    if (!Number.isFinite(h) || h < 80 || h > 3600) {
+      h = 360;
+    }
+    return Math.min(cap, Math.max(240, h));
+  }
+
+  /** Ajusta altura del candlestick al hueco real del contenedor (con tope duro). */
+  function reflowLoveCandlesChart() {
+    const el = document.getElementById("love-chart-container");
+    if (!annaLoveChart || !el) return;
+    const h = clampLoveChartHeight(el.getBoundingClientRect().height || el.clientHeight);
+    if (lastLoveChartPixelHeight >= 0 && Math.abs(h - lastLoveChartPixelHeight) < 5) {
+      return;
+    }
+    lastLoveChartPixelHeight = h;
+    try {
+      annaLoveChart.updateOptions({ chart: { height: h } }, false, true);
+    } catch (_e) {
+      try {
+        annaLoveChart.resize();
+      } catch (_e2) {}
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Reloj
   // ---------------------------------------------------------------------------
@@ -92,26 +133,46 @@
     windowEl.style.zIndex = String(zStack);
   }
 
-  /**
-   * @param {HTMLElement} windowEl
-   * @param {boolean} visible
-   */
-  function setWindowVisible(windowEl, visible) {
-    if (!windowEl) return;
+/**
+ * @param {HTMLElement} windowEl
+ */
+function pinWindowFromRect(windowEl) {
+  if (!windowEl) return;
+  const rect = windowEl.getBoundingClientRect();
+  windowEl.style.left = `${Math.round(rect.left)}px`;
+  windowEl.style.top = `${Math.round(rect.top)}px`;
+  windowEl.style.width = `${Math.round(rect.width)}px`;
+  windowEl.style.height = `${Math.round(rect.height)}px`;
+  windowEl.style.maxHeight = "none";
+  windowEl.style.transform = "none";
+}
 
-    if (visible) {
-      windowEl.classList.add("is-open");
-      windowEl.style.display = "block";
-      windowEl.hidden = false;
-      windowEl.setAttribute("aria-hidden", "false");
+/**
+ * @param {HTMLElement} windowEl
+ * @param {boolean} visible
+ */
+function setWindowVisible(windowEl, visible) {
+  if (!windowEl) return;
+
+  if (visible) {
+    windowEl.classList.add("is-open");
+    windowEl.style.removeProperty("display");
+    windowEl.hidden = false;
+    windowEl.setAttribute("aria-hidden", "false");
+    window.requestAnimationFrame(function () {
+      if (!windowEl.classList.contains("is-positioned")) {
+        pinWindowFromRect(windowEl);
+        windowEl.classList.add("is-positioned");
+      }
       bringToFront(windowEl);
-    } else {
-      windowEl.classList.remove("is-open");
-      windowEl.style.display = "none";
-      windowEl.hidden = true;
-      windowEl.setAttribute("aria-hidden", "true");
-    }
+    });
+  } else {
+    windowEl.classList.remove("is-open");
+    windowEl.hidden = true;
+    windowEl.setAttribute("aria-hidden", "true");
+    windowEl.style.removeProperty("display");
   }
+}
 
   // ---------------------------------------------------------------------------
   // Arrastre (cada ventana registrada es independiente)
@@ -141,14 +202,13 @@
 
     function ensureExplicitPosition() {
       if (windowEl.classList.contains("is-positioned")) return;
-      const rect = windowEl.getBoundingClientRect();
-      windowEl.style.left = rect.left + "px";
-      windowEl.style.top = rect.top + "px";
+      pinWindowFromRect(windowEl);
       windowEl.classList.add("is-positioned");
     }
 
     function onPointerDown(e) {
       if (e.target.closest(".window__close")) return;
+      if (e.target.closest(".window__resize-handle")) return;
 
       dragging = true;
       ensureExplicitPosition();
@@ -175,12 +235,21 @@
       const margin = 8;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
+      const taskbar =
+        parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            "--taskbar-height"
+          )
+        ) || 44;
       const rect = windowEl.getBoundingClientRect();
       const w = rect.width;
       const h = rect.height;
 
       nextLeft = Math.min(Math.max(nextLeft, margin), vw - w - margin);
-      nextTop = Math.min(Math.max(nextTop, margin), vh - h - margin);
+      nextTop = Math.min(
+        Math.max(nextTop, margin),
+        vh - taskbar - h - margin
+      );
 
       windowEl.style.left = nextLeft + "px";
       windowEl.style.top = nextTop + "px";
@@ -207,18 +276,222 @@
       function () {
         if (!windowEl.classList.contains("is-positioned")) return;
         const margin = 8;
+        const taskbar =
+          parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue(
+              "--taskbar-height"
+            )
+          ) || 44;
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        const rect = windowEl.getBoundingClientRect();
+
+        let width = getNumericStyle(windowEl, "width");
+        let height = getNumericStyle(windowEl, "height");
+        if (!width || !height) {
+          const rr = windowEl.getBoundingClientRect();
+          width = rr.width;
+          height = rr.height;
+        }
+
         let left = getNumericStyle(windowEl, "left");
         let top = getNumericStyle(windowEl, "top");
-        left = Math.min(Math.max(left, margin), vw - rect.width - margin);
-        top = Math.min(Math.max(top, margin), vh - rect.height - margin);
+        left = Math.min(Math.max(left, margin), vw - width - margin);
+        top = Math.min(
+          Math.max(top, margin),
+          vh - taskbar - height - margin
+        );
         windowEl.style.left = left + "px";
         windowEl.style.top = top + "px";
       },
       { passive: true }
     );
+  }
+
+  /** @param {HTMLElement} windowEl */
+  function attachWindowResizeHandles(windowEl) {
+    if (!windowEl || windowEl.querySelector(".window__resize-grips")) return;
+    const wrap = document.createElement("div");
+    wrap.className = "window__resize-grips";
+    wrap.setAttribute("aria-hidden", "true");
+
+    const edges = ["n", "ne", "e", "se", "s", "sw", "w", "nw"];
+    edges.forEach(function (edge) {
+      const span = document.createElement("span");
+      span.className = "window__resize-handle window__resize-handle--" + edge;
+      span.dataset.resize = edge;
+      span.setAttribute("role", "presentation");
+      wrap.appendChild(span);
+    });
+
+    windowEl.appendChild(wrap);
+    registerWindowResize(windowEl);
+  }
+
+  /**
+   * Redimensionar ventana arrastrando bordes / esquinas.
+   * @param {HTMLElement} windowEl
+   */
+  function registerWindowResize(windowEl) {
+    const grips = windowEl.querySelector(".window__resize-grips");
+    if (!grips) return;
+
+    const taskbarPad = function () {
+      return (
+        parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            "--taskbar-height"
+          )
+        ) || 44
+      );
+    };
+
+    const readMinMax = function () {
+      const minW =
+        parseFloat(windowEl.getAttribute("data-min-width") || "") ||
+        parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            "--window-min-width"
+          )
+        ) ||
+        260;
+      const minH = parseFloat(windowEl.getAttribute("data-min-height") || "") || 120;
+      const maxW = parseFloat(windowEl.getAttribute("data-max-width") || "") || Infinity;
+      const maxHVal = windowEl.getAttribute("data-max-height");
+      const maxH = maxHVal ? parseFloat(maxHVal) || Infinity : Infinity;
+      return { minW, minH, maxW, maxH };
+    };
+
+    let resizing = false;
+    let edgeActive = "";
+    let startX = 0;
+    let startY = 0;
+    let L0 = 0;
+    let T0 = 0;
+    let W0 = 0;
+    let H0 = 0;
+    let pendingChart = false;
+
+    function scheduleTrackerChartReflow() {
+      if (windowEl.id !== "window-tracker") return;
+      if (pendingChart) return;
+      pendingChart = true;
+      window.requestAnimationFrame(function () {
+        pendingChart = false;
+        reflowLoveCandlesChart();
+      });
+    }
+
+    function onPointerDown(e) {
+      const t = e.target;
+      if (!(t instanceof Element) || !t.classList.contains("window__resize-handle")) {
+        return;
+      }
+      if (e.button !== 0) return;
+      e.preventDefault();
+      resizing = true;
+      edgeActive = t.dataset.resize || "";
+      if (!edgeActive) return;
+
+      if (!windowEl.classList.contains("is-positioned")) {
+        pinWindowFromRect(windowEl);
+        windowEl.classList.add("is-positioned");
+      }
+
+      windowEl.classList.add("is-resizing");
+      bringToFront(windowEl);
+
+      startX = e.clientX;
+      startY = e.clientY;
+      L0 = getNumericStyle(windowEl, "left");
+      T0 = getNumericStyle(windowEl, "top");
+      const r = windowEl.getBoundingClientRect();
+      W0 = r.width;
+      H0 = r.height;
+
+      try {
+        grips.setPointerCapture(e.pointerId);
+      } catch (_err) {}
+    }
+
+    function onPointerMove(e) {
+      if (!resizing) return;
+      const margin = 8;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const tb = taskbarPad();
+      const { minW, minH, maxW, maxH } = readMinMax();
+
+      const absMaxW = Math.min(maxW, vw - margin * 2);
+      const absMaxH = Math.min(maxH, vh - tb - margin * 2);
+
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      let L = L0;
+      let T = T0;
+      let W = W0;
+      let H = H0;
+
+      if (edgeActive.includes("e")) {
+        W = W0 + dx;
+      }
+      if (edgeActive.includes("s")) {
+        H = H0 + dy;
+      }
+      if (edgeActive.includes("w")) {
+        const newW = W0 - dx;
+        if (newW >= minW) {
+          const shift = W0 - newW;
+          W = newW;
+          L = L0 + shift;
+        }
+      }
+      if (edgeActive.includes("n")) {
+        const newH = H0 - dy;
+        if (newH >= minH) {
+          const shift = H0 - newH;
+          H = newH;
+          T = T0 + shift;
+        }
+      }
+
+      W = Math.min(Math.max(W, minW), absMaxW);
+      H = Math.min(Math.max(H, minH), absMaxH);
+
+      if (L + W > vw - margin) {
+        L = vw - margin - W;
+      }
+      if (L < margin) L = margin;
+
+      if (T + H > vh - tb - margin) {
+        T = vh - tb - margin - H;
+      }
+      if (T < margin) T = margin;
+
+      windowEl.style.left = `${Math.round(L)}px`;
+      windowEl.style.top = `${Math.round(T)}px`;
+      windowEl.style.width = `${Math.round(W)}px`;
+      windowEl.style.height = `${Math.round(H)}px`;
+      windowEl.style.maxHeight = "none";
+
+      scheduleTrackerChartReflow();
+    }
+
+    function onPointerUp(e) {
+      if (!resizing) return;
+      resizing = false;
+      edgeActive = "";
+      windowEl.classList.remove("is-resizing");
+      try {
+        grips.releasePointerCapture(e.pointerId);
+      } catch (_err) {}
+      scheduleTrackerChartReflow();
+    }
+
+    grips.addEventListener("pointerdown", onPointerDown);
+    grips.addEventListener("pointermove", onPointerMove);
+    grips.addEventListener("pointerup", onPointerUp);
+    grips.addEventListener("pointercancel", onPointerUp);
   }
 
   // ---------------------------------------------------------------------------
@@ -445,8 +718,7 @@
     },
   ];
 
-  /** Instancia ApexCharts (una sola) */
-  let annaLoveChart = null;
+
 
   /** Lee --anna-candle-bull / --anna-candle-bear desde style.css (única fuente de verdad cromática). */
   function getLoveCandleColorsFromTheme() {
@@ -466,6 +738,14 @@
     });
   }
 
+  /** Altura efectiva del contenedor Apex (con tope; evita “altura infinita”). */
+  function readLoveChartPixelHeight() {
+    const el = document.getElementById("love-chart-container");
+    if (!el) return clampLoveChartHeight(380);
+    const r = el.getBoundingClientRect().height || el.clientHeight;
+    return clampLoveChartHeight(r || 380);
+  }
+
   /**
    * Primera apertura: render. Siguientes: resize por si el layout cambió.
    */
@@ -478,12 +758,15 @@
 
     if (annaLoveChart) {
       window.requestAnimationFrame(function () {
-        annaLoveChart.resize();
+        lastLoveChartPixelHeight = -1;
+        reflowLoveCandlesChart();
       });
       return;
     }
 
     const candleColors = getLoveCandleColorsFromTheme();
+
+    const chartH = readLoveChartPixelHeight();
 
     const options = {
       series: [
@@ -494,7 +777,8 @@
       ],
       chart: {
         type: "candlestick",
-        height: 300,
+        height: chartH,
+        width: "100%",
         background: "transparent",
         toolbar: {
           show: true,
@@ -564,6 +848,15 @@
             " · " +
             dateStr +
             "</span>" +
+            '<span class="anna-love-tooltip__ohlc">Apertura ' +
+            row.o +
+            " · Máx " +
+            row.h +
+            " · Mín " +
+            row.l +
+            " · Cierre " +
+            row.c +
+            "</span>" +
             "<span>" +
             row.story +
             "</span>" +
@@ -575,6 +868,11 @@
 
     annaLoveChart = new ApexCharts(el, options);
     annaLoveChart.render();
+
+    lastLoveChartPixelHeight = -1;
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(reflowLoveCandlesChart);
+    });
   }
 
   /**
@@ -623,7 +921,7 @@
 
   function onOpenTracker() {
     window.requestAnimationFrame(function () {
-      initAnnaTrackerChart();
+      window.requestAnimationFrame(initAnnaTrackerChart);
     });
   }
 
@@ -701,6 +999,12 @@
     });
   }
 
+  function wireWindowResizeRails() {
+    document.querySelectorAll(".window.window--draggable").forEach(function (win) {
+      attachWindowResizeHandles(win);
+    });
+  }
+
   function wireAllDrags() {
     const setups = [
       ["window-notepad", "notepad-titlebar"],
@@ -735,11 +1039,20 @@
     wireDesktopIcons();
     wireCloseButtons();
     wireWindowFocusOnMouseDown();
+    wireWindowResizeRails();
     wireAllDrags();
     initMusicPlayer();
     initTrash();
     initAnnaBuyButton();
     wireStartButton();
+
+    window.addEventListener(
+      "resize",
+      function () {
+        window.requestAnimationFrame(reflowLoveCandlesChart);
+      },
+      { passive: true }
+    );
   }
 
   if (document.readyState === "loading") {
