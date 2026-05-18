@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Anna OS — un escritorio web romántico estilo retro." />
+  <title>Anna OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- ApexCharts: gráfico de velas Love Candles ($ANNA Tracker) -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+  <!-- Escritorio: fondo + iconos -->
+  <main class="desktop" id="desktop" aria-label="Escritorio Anna OS">
+    <div
+      class="desktop-icon"
+      id="icon-razones"
+      role="button"
+      tabindex="0"
+      aria-label="Abrir razones.txt"
+      data-app="notepad"
+    >
+      <span class="desktop-icon__glyph desktop-icon__glyph--notepad" aria-hidden="true"></span>
+      <span class="desktop-icon__label">razones.txt</span>
+    </div>
+
+    <div
+      class="desktop-icon"
+      id="icon-cancion"
+      role="button"
+      tabindex="0"
+      aria-label="Abrir reproductor: nuestra_cancion.mp3"
+      data-app="player"
+    >
+      <span class="desktop-icon__glyph desktop-icon__glyph--music" aria-hidden="true"></span>
+      <span class="desktop-icon__label">nuestra_cancion.mp3</span>
+    </div>
+
+    <div
+      class="desktop-icon"
+      id="icon-papelera"
+      role="button"
+      tabindex="0"
+      aria-label="Papelera: Mis miedos"
+      data-app="trash"
+    >
+      <span class="desktop-icon__glyph desktop-icon__glyph--trash" aria-hidden="true"></span>
+      <span class="desktop-icon__label">Mis miedos</span>
+    </div>
+
+    <div
+      class="desktop-icon"
+      id="icon-anna-tracker"
+      role="button"
+      tabindex="0"
+      aria-label="Abrir $ANNA Tracker"
+      data-app="tracker"
+    >
+      <span class="desktop-icon__glyph desktop-icon__glyph--tracker" aria-hidden="true"></span>
+      <span class="desktop-icon__label">$ANNA Tracker</span>
+    </div>
+  </main>
+
+  <!-- Ventana Bloc de notas (oculta hasta abrir) -->
+  <div
+    class="window window--notepad window--draggable"
+    id="window-notepad"
+    role="dialog"
+    aria-labelledby="window-notepad-title"
+    aria-hidden="true"
+    hidden
+  >
+    <header class="window__titlebar" id="notepad-titlebar">
+      <span class="window__title" id="window-notepad-title">razones.txt — Bloc de notas</span>
+      <button type="button" class="window__close" id="notepad-close" aria-label="Cerrar ventana">X</button>
+    </header>
+    <div class="window__body">
+      <textarea
+        class="notepad__textarea"
+        id="notepad-content"
+        spellcheck="false"
+        aria-label="Contenido de razones.txt"
+      >5 meses contigo, y cada día mi mundo (y este escritorio) se ve más bonito.
+
+
+Aquí hay un log rápido de todo lo que me encanta de ti:
+
+
+Tu acento y esas palabras de México que poco a poco se me están pegando.
+
+
+Cómo se te iluminan los ojos (o la voz) cuando me cuentas algo que te emociona.
+
+
+Que haces que la distancia desde Perú se sienta como si estuvieras aquí a mi lado, en la misma habitación.
+
+
+Tu paciencia infinita cuando me pongo en modo 'nerd' a programar.
+
+
+Tu sentido del humor, que siempre logra sacarme de cualquier bug mental.
+
+
+Tu sonrisa, que es literalmente el mejor render de todo mi día.
+
+
+Eres el mejor 'commit' que he hecho en mi vida.
+
+
+Te amo, Anna.</textarea>
+    </div>
+  </div>
+
+  <!-- Ventana Reproductor (oculta hasta abrir) -->
+  <div
+    class="window window--player window--draggable"
+    id="window-player"
+    role="dialog"
+    aria-labelledby="window-player-title"
+    aria-hidden="true"
+    hidden
+  >
+    <header class="window__titlebar" id="player-titlebar">
+      <span class="window__title" id="window-player-title">nuestra_cancion.mp3 — Reproductor</span>
+      <button type="button" class="window__close" id="player-close" aria-label="Cerrar ventana">X</button>
+    </header>
+    <div class="window__body window__body--player">
+      <!-- El audio se carga en script.js con new Audio('nuestra_cancion.mp3') -->
+      <div class="player__panel">
+        <p class="player__song-title" id="player-song-label">Nuestra canción ♡</p>
+        <p class="player__meta" id="player-meta" aria-live="polite"></p>
+        <div
+          class="player__progress-wrap"
+          id="player-progress-wrap"
+          role="slider"
+          aria-label="Progreso de reproducción"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+          tabindex="0"
+        >
+          <div class="player__progress-track">
+            <div class="player__progress-fill" id="player-progress-fill"></div>
+          </div>
+        </div>
+        <div class="player__controls">
+          <button type="button" class="player__play-btn" id="player-toggle" aria-pressed="false" aria-label="Reproducir">
+            <span class="player__play-icon" aria-hidden="true">▶</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ventana Papelera — Mis miedos -->
+  <div
+    class="window window--trash window--draggable"
+    id="window-trash"
+    role="dialog"
+    aria-labelledby="window-trash-title"
+    aria-hidden="true"
+    hidden
+  >
+    <header class="window__titlebar" id="trash-titlebar">
+      <span class="window__title" id="window-trash-title">Mis miedos — Papelera</span>
+      <button type="button" class="window__close" id="trash-close" aria-label="Cerrar ventana">X</button>
+    </header>
+    <div class="window__body window__body--trash">
+      <div class="trash-explorer">
+        <div class="trash-explorer__head">
+          <span class="trash-explorer__col">Nombre</span>
+          <span class="trash-explorer__col trash-explorer__col--size">Tamaño</span>
+        </div>
+        <ul class="trash-list" id="trash-list" aria-label="Archivos en la papelera">
+          <li class="trash-file" data-trash-item>
+            <span class="trash-file__icon" aria-hidden="true">📄</span>
+            <span class="trash-file__name">miedo_a_perderte.doc</span>
+            <span class="trash-file__size">2 KB</span>
+          </li>
+          <li class="trash-file" data-trash-item>
+            <span class="trash-file__icon" aria-hidden="true">📄</span>
+            <span class="trash-file__name">no_ser_suficiente.rtf</span>
+            <span class="trash-file__size">1 KB</span>
+          </li>
+          <li class="trash-file" data-trash-item>
+            <span class="trash-file__icon" aria-hidden="true">📄</span>
+            <span class="trash-file__name">olvidar_palabras.txt</span>
+            <span class="trash-file__size">3 KB</span>
+          </li>
+        </ul>
+      </div>
+      <button type="button" class="trash-empty-btn" id="trash-empty-btn">
+        Vaciar Papelera
+      </button>
+    </div>
+  </div>
+
+  <!-- Ventana $ANNA Tracker — Love Candles (broker retro-cute) -->
+  <div
+    class="window window--tracker window--draggable"
+    id="window-tracker"
+    role="dialog"
+    aria-labelledby="window-tracker-title"
+    aria-hidden="true"
+    hidden
+  >
+    <header class="window__titlebar" id="tracker-titlebar">
+      <span class="window__title" id="window-tracker-title">$ANNA Tracker — Terminal romantic</span>
+      <button type="button" class="window__close" id="tracker-close" aria-label="Cerrar ventana">X</button>
+    </header>
+    <div class="window__body window__body--tracker">
+      <div class="anna-tracker__layout">
+        <section class="anna-tracker__chart-col" aria-label="Gráfico Love Candles">
+          <p class="anna-tracker__chart-label">Love Candles — $ANNA/AMOR</p>
+          <div id="love-chart-container" class="love-chart-container"></div>
+        </section>
+        <aside class="anna-broker-panel" aria-label="Panel de orden">
+          <p class="anna-broker-panel__instrument">
+            Instrumento: $ANNA / AMOR (Día 150)
+          </p>
+          <div class="anna-broker-panel__sentiment" role="status">
+            Sentimiento de Anna: 🚀 100% Bullish (Alcista)
+          </div>
+          <button type="button" class="anna-broker-panel__buy-btn" id="anna-buy-love-btn">
+            COMPRAR MÁS AMOR
+          </button>
+          <p class="anna-broker-panel__hint">Ejecución inmediata · Sin comisiones del corazón</p>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de tareas -->
+  <footer class="taskbar" role="contentinfo">
+    <button type="button" class="taskbar__start" id="btn-start" aria-label="Inicio">
+      <span class="taskbar__start-heart" aria-hidden="true">♥</span>
+      <span>Inicio</span>
+    </button>
+    <div class="taskbar__clock" id="taskbar-clock" aria-live="polite" title="Hora actual">
+      00:00:00
+    </div>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,893 @@
+/**
+ * Anna OS — estilo Retro-Cute (Win95/98 + pasteles románticos)
+ * Variables y utilidades pensadas para escalar (más ventanas, temas, etc.)
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Tokens de diseño                                                            */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  /* Paleta pastel */
+  --color-bg-deep: #c9b8ff;
+  --color-bg-light: #fff0f5;
+  --color-accent-pink: #ffb7d5;
+  --color-accent-lavender: #d4c4ff;
+  --color-accent-mint: #b8f2e6;
+  --color-accent-peach: #ffd4c4;
+
+  /* Superficie ventanas / barra */
+  --color-surface: #fff8fc;
+  --color-surface-alt: #fce8f3;
+  --color-titlebar: linear-gradient(180deg, #ffd6ea 0%, #f0c8ff 55%, #d8b8ff 100%);
+  --color-border-dark: #9b7abf;
+  --color-border-light: #ffffff;
+  --color-shadow-inset-light: rgba(255, 255, 255, 0.85);
+  --color-shadow-inset-dark: rgba(120, 80, 140, 0.35);
+
+  /* Texto */
+  --color-text: #4a3a5c;
+  --color-text-muted: #7a6588;
+
+  /* Tipografía */
+  --font-pixel: "Press Start 2P", system-ui, sans-serif;
+  --font-mono: "VT323", "Consolas", "Courier New", monospace;
+
+  /* Medidas retro */
+  --border-3d-width: 2px;
+  --taskbar-height: 44px;
+  --window-min-width: 280px;
+  --z-taskbar: 1000;
+  --z-window: 500;
+
+  /* Love Candles ($ANNA Tracker) — ApexCharts: coincide con la paleta retro-pastel del OS */
+  --anna-candle-bull: #a8dfc4;
+  --anna-candle-bear: #f2bdd4;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Reset mínimo                                                               */
+/* -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--color-text);
+  background-color: var(--color-bg-deep);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Patrón de escritorio + fondo                                               */
+/* -------------------------------------------------------------------------- */
+
+.desktop {
+  position: relative;
+  width: 100%;
+  height: calc(100% - var(--taskbar-height));
+  padding: 16px;
+  /* Patrón sutil tipo cuadros pastel */
+  background-color: var(--color-bg-light);
+  background-image:
+    linear-gradient(90deg, rgba(255, 182, 213, 0.12) 1px, transparent 1px),
+    linear-gradient(rgba(200, 180, 255, 0.1) 1px, transparent 1px),
+    radial-gradient(ellipse at 20% 30%, rgba(255, 214, 234, 0.9) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(184, 242, 230, 0.35) 0%, transparent 45%);
+  background-size:
+    24px 24px,
+    24px 24px,
+    100% 100%,
+    100% 100%;
+  user-select: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Iconos de escritorio                                                        */
+/* -------------------------------------------------------------------------- */
+
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 104px;
+  margin-bottom: 20px;
+  padding: 8px 4px;
+  border: var(--border-3d-width) dotted transparent;
+  border-radius: 4px;
+  cursor: default;
+  text-align: center;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.desktop-icon:focus {
+  outline: 2px dashed var(--color-accent-pink);
+  outline-offset: 2px;
+}
+
+.desktop-icon:hover,
+.desktop-icon:focus-visible {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+.desktop-icon:active {
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.desktop-icon__glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 8px;
+  image-rendering: pixelated;
+  border: var(--border-3d-width) solid;
+  border-color: var(--color-border-light) var(--color-border-dark) var(--color-border-dark)
+    var(--color-border-light);
+  box-shadow:
+    inset 1px 1px 0 var(--color-shadow-inset-light),
+    inset -1px -1px 0 var(--color-shadow-inset-dark);
+  background: var(--color-surface);
+}
+
+/* Bloc de notas — píxeles simples con gradiente */
+.desktop-icon__glyph--notepad {
+  background: linear-gradient(180deg, #fff 0%, #ffe8f4 100%);
+  position: relative;
+}
+
+.desktop-icon__glyph--notepad::before {
+  content: "";
+  position: absolute;
+  inset: 8px 10px;
+  background: repeating-linear-gradient(
+    transparent,
+    transparent 4px,
+    rgba(200, 160, 200, 0.35) 4px,
+    rgba(200, 160, 200, 0.35) 5px
+  );
+}
+
+.desktop-icon__glyph--notepad::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  right: 8px;
+  height: 6px;
+  background: var(--color-accent-pink);
+  border: 1px solid var(--color-border-dark);
+}
+
+/* Música — icono tipo cassette / nota */
+.desktop-icon__glyph--music {
+  background: linear-gradient(135deg, #e8d4ff 0%, #ffd6ea 100%);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.desktop-icon__glyph--music::before {
+  content: "♪";
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Papelera */
+.desktop-icon__glyph--trash {
+  background: linear-gradient(180deg, #d8e8ff 0%, #c8dcff 40%, #a8c4f0 100%);
+  position: relative;
+}
+
+.desktop-icon__glyph--trash::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  right: 10px;
+  height: 8px;
+  border: 2px solid var(--color-border-dark);
+  border-bottom: none;
+  border-radius: 2px 2px 0 0;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.desktop-icon__glyph--trash::after {
+  content: "";
+  position: absolute;
+  bottom: 6px;
+  left: 12px;
+  right: 12px;
+  height: 22px;
+  border: 2px solid var(--color-border-dark);
+  border-radius: 0 0 4px 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(120, 80, 140, 0.15) 0 2px,
+    transparent 2px 6px
+  );
+}
+
+/* $ANNA Tracker — gráfico + moneda/corazón pixel */
+.desktop-icon__glyph--tracker {
+  background: linear-gradient(145deg, #fff9fb 0%, #d6f5e8 50%, #fce8ff 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.desktop-icon__glyph--tracker::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  bottom: 10px;
+  width: 4px;
+  height: 18px;
+  background: #c5edc8;
+  border: 1px solid var(--color-border-dark);
+  box-shadow: 10px -6px 0 -1px #f5b8d8, 18px 2px 0 -1px #b8e8d8;
+}
+
+.desktop-icon__glyph--tracker::after {
+  content: "♥";
+  position: absolute;
+  right: 3px;
+  top: 5px;
+  font-size: 14px;
+  line-height: 1;
+  color: #e84a7a;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.desktop-icon__label {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  line-height: 1.5;
+  color: var(--color-text);
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.85);
+  word-break: break-word;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Ventana estilo Win95                                                       */
+/* -------------------------------------------------------------------------- */
+
+.window {
+  position: fixed;
+  z-index: var(--z-window);
+  min-width: var(--window-min-width);
+  width: min(90vw, 420px);
+  max-height: min(70vh, 360px);
+  display: none;
+  background: var(--color-surface);
+  border: var(--border-3d-width) solid;
+  border-color: var(--color-border-light) var(--color-border-dark) var(--color-border-dark)
+    var(--color-border-light);
+  box-shadow:
+    4px 4px 0 rgba(80, 50, 100, 0.2),
+    inset 1px 1px 0 var(--color-shadow-inset-light),
+    inset -1px -1px 0 var(--color-shadow-inset-dark);
+}
+
+.window.is-open {
+  /* Visible; bloque apila barra de título + cuerpo (requisito display: block) */
+  display: block;
+}
+
+.window__titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--color-titlebar);
+  border-bottom: var(--border-3d-width) solid var(--color-border-dark);
+  cursor: grab;
+  user-select: none;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  line-height: 1.4;
+}
+
+.window__titlebar:active {
+  cursor: grabbing;
+}
+
+.window__titlebar--dragging {
+  filter: saturate(1.08);
+}
+
+.window__title {
+  flex: 1;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.window__close {
+  flex-shrink: 0;
+  min-width: 28px;
+  height: 24px;
+  padding: 0 6px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--color-text);
+  background: var(--color-surface-alt);
+  border: var(--border-3d-width) solid;
+  border-color: var(--color-border-light) var(--color-border-dark) var(--color-border-dark)
+    var(--color-border-light);
+  cursor: pointer;
+}
+
+.window__close:hover {
+  background: #ffe0ef;
+}
+
+.window__close:active {
+  border-color: var(--color-border-dark) var(--color-border-light) var(--color-border-light)
+    var(--color-border-dark);
+}
+
+.window__body {
+  padding: 8px;
+  background: var(--color-surface);
+}
+
+.notepad__textarea {
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  resize: none;
+  border: var(--border-3d-width) solid;
+  border-color: var(--color-border-dark) var(--color-border-light) var(--color-border-light)
+    var(--color-border-dark);
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  line-height: 1.35;
+  color: var(--color-text);
+  background: #fffefb;
+  outline: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Ventana — Reproductor                                                       */
+/* -------------------------------------------------------------------------- */
+
+.window--player {
+  width: min(92vw, 380px);
+  max-height: min(75vh, 420px);
+}
+
+.window__body--player {
+  padding: 12px;
+}
+
+.player__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 8px;
+  background: linear-gradient(180deg, #fff5fb 0%, #ede4ff 100%);
+  border: var(--border-3d-width) solid;
+  border-color: var(--color-border-dark) var(--color-border-light) var(--color-border-light)
+    var(--color-border-dark);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.player__song-title {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--color-text);
+}
+
+.player__meta {
+  margin: -6px 0 0;
+  min-height: 1.2em;
+  font-size: 18px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.player__progress-wrap {
+  width: 100%;
+  max-width: 280px;
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.player__progress-wrap:focus-visible {
+  outline: 2px dashed var(--color-accent-pink);
+  outline-offset: 4px;
+}
+
+.player__progress-track {
+  height: 14px;
+  background: #dbc8ec;
+  border: var(--border-3d-width) solid;
+  border-color: var(--color-border-dark) var(--color-border-light) var(--color-border-light)
+    var(--color-border-dark);
+  box-shadow: inset 1px 1px 2px rgba(80, 50, 100, 0.2);
+}
+
+.player__progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(180deg, #ffb8d8 0%, #e8a8d8 45%, #c898e8 100%);
+  border-right: 1px solid rgba(80, 50, 100, 0.25);
+  transition: width 0.08s linear;
+  pointer-events: none;
+}
+
+.player__controls {
+  display: flex;
+  justify-content: center;
+}
+
+.player__play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 56px;
+  padding: 0;
+  font-family: var(--font-pixel);
+  color: var(--color-text);
+  background: linear-gradient(180deg, #fff8ff 0%, #f0d0ec 100%);
+  border: var(--border-3d-width) solid;
+  border-color: var(--color-border-light) var(--color-border-dark) var(--color-border-dark)
+    var(--color-border-light);
+  cursor: pointer;
+  box-shadow: 2px 2px 0 rgba(80, 50, 100, 0.15);
+}
+
+.player__play-btn:hover {
+  filter: brightness(1.04);
+}
+
+.player__play-btn:active {
+  border-color: var(--color-border-dark) var(--color-border-light) var(--color-border-light)
+    var(--color-border-dark);
+  box-shadow: none;
+  transform: translate(1px, 1px);
+}
+
+.player__play-btn[aria-pressed="true"] {
+  background: linear-gradient(180deg, #e8ffd8 0%, #c8f0c8 100%);
+}
+
+.player__play-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Ventana — Papelera                                                         */
+/* -------------------------------------------------------------------------- */
+
+.window--trash {
+  width: min(90vw, 400px);
+  max-height: min(78vh, 400px);
+}
+
+.window__body--trash {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px;
+  min-height: 0;
+}
+
+.trash-explorer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: var(--border-3d-width) solid;
+  border-color: var(--color-border-dark) var(--color-border-light) var(--color-border-light)
+    var(--color-border-dark);
+  background: #fffefb;
+  overflow: hidden;
+}
+
+.trash-explorer__head {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  font-family: var(--font-pixel);
+  font-size: 6px;
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+  background: linear-gradient(180deg, #f0e8ff 0%, #dcccf5 100%);
+  border-bottom: 1px solid var(--color-border-dark);
+}
+
+.trash-explorer__col {
+  flex: 1;
+}
+
+.trash-explorer__col--size {
+  flex: 0 0 52px;
+  text-align: right;
+}
+
+.trash-list {
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.trash-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 19px;
+  border-bottom: 1px dotted rgba(155, 122, 191, 0.45);
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+.trash-file:last-child {
+  border-bottom: none;
+}
+
+.trash-file__icon {
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.trash-file__name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trash-file__size {
+  flex-shrink: 0;
+  width: 52px;
+  font-size: 17px;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.trash-list.is-emptying .trash-file:nth-child(1) {
+  transition-delay: 0s;
+}
+
+.trash-list.is-emptying .trash-file:nth-child(2) {
+  transition-delay: 0.1s;
+}
+
+.trash-list.is-emptying .trash-file:nth-child(3) {
+  transition-delay: 0.2s;
+}
+
+.trash-list.is-emptying .trash-file:nth-child(n + 4) {
+  transition-delay: 0.28s;
+}
+
+.trash-list.is-emptying .trash-file {
+  opacity: 0;
+  transform: translateX(-14px) scale(0.96);
+}
+
+.trash-empty-btn {
+  align-self: stretch;
+  padding: 8px 12px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  line-height: 1.4;
+  color: var(--color-text);
+  background: linear-gradient(180deg, #ffe8f4 0%, #f0c8e8 100%);
+  border: var(--border-3d-width) solid;
+  border-color: var(--color-border-light) var(--color-border-dark) var(--color-border-dark)
+    var(--color-border-light);
+  cursor: pointer;
+}
+
+.trash-empty-btn:hover:not(:disabled) {
+  filter: brightness(1.03);
+}
+
+.trash-empty-btn:active:not(:disabled) {
+  border-color: var(--color-border-dark) var(--color-border-light) var(--color-border-light)
+    var(--color-border-dark);
+}
+
+.trash-empty-btn:disabled {
+  cursor: default;
+  opacity: 0.85;
+  background: linear-gradient(180deg, #f0f0f8 0%, #e0dce8 100%);
+  color: var(--color-text-muted);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Ventana — $ANNA Tracker (broker + ApexCharts)                                */
+/* -------------------------------------------------------------------------- */
+
+.window--tracker {
+  width: min(96vw, 760px);
+  max-height: min(90vh, 560px);
+}
+
+.window__body--tracker {
+  padding: 10px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.anna-tracker__layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.anna-tracker__chart-col {
+  flex: 1 1 58%;
+  min-width: min(100%, 280px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.anna-tracker__chart-label {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+}
+
+.love-chart-container {
+  flex: 1;
+  min-height: 300px;
+  width: 100%;
+  background: linear-gradient(180deg, #fffefb 0%, #f6f0ff 100%);
+  border: var(--border-3d-width) solid;
+  border-color: var(--color-border-dark) var(--color-border-light) var(--color-border-light)
+    var(--color-border-dark);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.7);
+  border-radius: 2px;
+}
+
+.anna-broker-panel {
+  flex: 1 1 220px;
+  min-width: min(100%, 220px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: linear-gradient(165deg, #fff8ff 0%, #e8f8f2 45%, #f0e8ff 100%);
+  border: var(--border-3d-width) solid;
+  border-color: var(--color-border-light) var(--color-border-dark) var(--color-border-dark)
+    var(--color-border-light);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.75),
+    inset -1px -1px 0 rgba(120, 80, 140, 0.12);
+}
+
+.anna-broker-panel__instrument {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  line-height: 1.65;
+  color: var(--color-text);
+}
+
+.anna-broker-panel__sentiment {
+  padding: 8px 10px;
+  font-size: 19px;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.65);
+  border: var(--border-3d-width) solid;
+  border-color: var(--color-border-dark) var(--color-border-light) var(--color-border-light)
+    var(--color-border-dark);
+  box-shadow: inset 1px 1px 2px rgba(80, 50, 100, 0.08);
+}
+
+.anna-broker-panel__buy-btn {
+  margin-top: auto;
+  padding: 14px 12px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: #2d5a3d;
+  background: linear-gradient(180deg, #d4fad9 0%, #9fe5b3 45%, #7dd89a 100%);
+  border: var(--border-3d-width) solid;
+  border-color: #e8fff0 var(--color-border-dark) var(--color-border-dark) #e8fff0;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 rgba(60, 100, 70, 0.18);
+}
+
+.anna-broker-panel__buy-btn:hover {
+  filter: brightness(1.04);
+}
+
+.anna-broker-panel__buy-btn:active {
+  border-color: var(--color-border-dark) #e8fff0 #e8fff0 var(--color-border-dark);
+  box-shadow: none;
+  transform: translate(1px, 1px);
+}
+
+.anna-broker-panel__hint {
+  margin: 0;
+  font-size: 16px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/* Tooltip ApexCharts (amor) */
+.anna-love-tooltip {
+  max-width: 240px;
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  line-height: 1.35;
+  color: var(--color-text);
+  background: linear-gradient(180deg, #fffafe 0%, #fce8f6 100%);
+  border: 2px solid var(--color-border-dark);
+  box-shadow: 3px 3px 0 rgba(80, 50, 100, 0.18);
+}
+
+.anna-love-tooltip__date {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--font-pixel);
+  font-size: 6px;
+  color: var(--color-text-muted);
+}
+
+/* Confeti (COMPRAR MÁS AMOR) */
+.confetti-root {
+  position: fixed;
+  inset: 0;
+  z-index: 990;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti-root.is-active {
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -12px;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0.95;
+  animation: confetti-fall 2.6s ease-in forwards;
+}
+
+@keyframes confetti-fall {
+  to {
+    transform: translate3d(var(--drift, 0), 110vh, 0) rotate(720deg);
+    opacity: 0.35;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Barra de tareas                                                             */
+/* -------------------------------------------------------------------------- */
+
+.taskbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-taskbar);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--taskbar-height);
+  padding: 4px 8px;
+  gap: 12px;
+  background: linear-gradient(180deg, #f8e8ff 0%, #dcc8f5 45%, #c4a8e8 100%);
+  border-top: var(--border-3d-width) solid var(--color-border-light);
+  box-shadow: 0 -2px 0 rgba(80, 50, 100, 0.12);
+}
+
+.taskbar__start {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--color-text);
+  background: linear-gradient(180deg, #fff4fb 0%, #f5d0ea 100%);
+  border: var(--border-3d-width) solid;
+  border-color: var(--color-border-light) var(--color-border-dark) var(--color-border-dark)
+    var(--color-border-light);
+  cursor: pointer;
+}
+
+.taskbar__start:hover {
+  filter: brightness(1.03);
+}
+
+.taskbar__start:active,
+.taskbar__start.is-pressed {
+  border-color: var(--color-border-dark) var(--color-border-light) var(--color-border-light)
+    var(--color-border-dark);
+}
+
+.taskbar__start-heart {
+  color: #e84a7a;
+  font-size: 12px;
+  line-height: 1;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.taskbar__clock {
+  flex-shrink: 0;
+  min-width: 100px;
+  padding: 4px 12px;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  letter-spacing: 0.06em;
+  color: var(--color-text);
+  text-align: center;
+  background: rgba(255, 255, 255, 0.45);
+  border: var(--border-3d-width) solid;
+  border-color: var(--color-border-dark) var(--color-border-light) var(--color-border-light)
+    var(--color-border-dark);
+  box-shadow: inset 1px 1px 2px rgba(80, 50, 100, 0.12);
+}
+
+/* Posiciones iniciales (centrado / offset; el script fija left/top al arrastrar) */
+.window--notepad {
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+}
+
+.window--player {
+  left: 52%;
+  top: 36%;
+  transform: translate(-50%, -50%);
+}
+
+.window--trash {
+  left: 34%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.window--tracker {
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+}
+
+.window.is-dragging,
+.window.is-positioned {
+  transform: none;
+}
