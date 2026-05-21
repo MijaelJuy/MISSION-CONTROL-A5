@@ -9,181 +9,159 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+      }
+    }
+  </script>
   <!-- ApexCharts: gráfico de velas Love Candles ($ANNA Tracker) -->
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-  <!-- GSAP: animación intro cinematográfica -->
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <!-- GSAP: orquesta la intro (zoom + overlays). -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+  <script src="intro-bootstrap.js" defer></script>
 </head>
 <body>
-  <!-- Intro GSAP — pixel-art SVG (programador + cohete); programador.gif opcional -->
+  <!-- Intro: pixel PNG → zoom al monitor → canvas Three.js (space-journey) -->
   <div
     id="anna-intro"
     class="anna-intro"
-    aria-label="Introducción cinematográfica"
-    role="presentation"
-    tabindex="-1"
+    aria-labelledby="anna-intro-cta"
+    tabindex="0"
+    onclick="typeof window.__AnnaIntroKickRequest==='function'&&window.__AnnaIntroKickRequest()"
   >
-    <div class="anna-intro__flash" id="anna-intro-flash" aria-hidden="true"></div>
+    <div class="anna-intro__scene">
+      <canvas id="anna-intro-three-canvas" aria-hidden="true"></canvas>
 
-    <div class="anna-intro__phase1" id="anna-intro-phase1">
-      <div id="anna-intro-dev-img" class="anna-intro__media-box anna-intro__media-box--dev">
-        <!-- Pixel-art SVG (sin build; ideal para GitHub Pages). GIF opcional tapa esta capa. -->
-        <svg
-          class="anna-intro__pixel-svg"
-          viewBox="0 0 48 36"
-          preserveAspectRatio="xMidYMid meet"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-          shape-rendering="crispEdges"
-          focusable="false"
-        >
-          <title>Escena pixel: programadora y monitor Anna OS</title>
-          <rect fill="#0f1424" height="36" width="48" />
-          <rect fill="#121822" height="6" width="48" x="0" y="2" />
-
-          <!-- Escritorio -->
-          <rect fill="#20140e" height="11" width="46" x="1" y="24" />
-          <rect fill="#463224" height="2" width="48" x="0" y="23" />
-
-          <!-- Pie CRT -->
-          <rect fill="#252f42" height="3" width="5" x="12" y="19" />
-
-          <!-- Monitor -->
-          <rect fill="#384c64" height="14" width="21" x="4" y="6" />
-          <rect fill="#283444" height="12" width="19" x="5" y="7" />
-          <rect fill="#03140f" height="9" width="17" x="6" y="8" />
-          <rect fill="#185548" height="1" width="7" x="7" y="9" />
-          <rect fill="#1e8060" height="1" width="13" x="7" y="10" />
-          <rect fill="#7af7b3" height="1" width="6" x="15" y="10" />
-          <rect fill="#1e8060" height="1" width="11" x="7" y="11" />
-          <rect fill="#7af7b3" height="1" width="3" x="7" y="12" />
-          <rect fill="#ff73a8" height="2" width="4" x="16" y="12" />
-          <rect fill="#ffffff" fill-opacity="0.07" height="9" width="2" x="19" y="8" />
-          <rect fill="#152028" height="1" width="19" x="5" y="17" />
-
-          <!-- Capsula coder: capucha + torso (atrás del teclado) -->
-          <rect fill="#534b78" height="6" width="14" x="33" y="15" />
-          <rect fill="#433a68" height="3" width="12" x="34" y="15" />
-
-          <!-- Taza -->
-          <rect fill="#7a5660" height="4" width="4" x="42" y="17" />
-          <rect fill="#ffc8d8" height="1" width="2" x="43" y="18" />
-
-          <!-- Teclado -->
-          <rect fill="#1e262e" height="2" width="20" x="28" y="21" />
-          <rect fill="#3d5690" height="1" width="14" x="29" y="21" />
-
-          <!-- Brazos / manos -->
-          <rect fill="#ebc4a8" height="2" width="5" x="30" y="19" />
-          <rect fill="#ebc4a8" height="2" width="4" x="29" y="20" />
-          <rect fill="#ebc4a8" height="2" width="4" x="35" y="20" />
-
-          <!-- Pelo (capas, menos “bloque”) -->
-          <rect fill="#1e141c" height="2" width="9" x="34" y="7" />
-          <rect fill="#1e141c" height="2" width="10" x="33" y="8" />
-          <rect fill="#2a2030" height="1" width="8" x="34" y="9" />
-
-          <!-- Cara más pequeña y baja, perfil hacia el monitor -->
-          <rect fill="#ebc4a8" height="7" width="8" x="34" y="10" />
-          <rect fill="#d09070" height="2" width="5" x="35" y="13" />
-          <rect fill="#242030" height="1" width="1" x="35" y="12" />
-          <rect fill="#242030" height="2" width="2" x="36" y="11" />
-          <rect fill="#e8f8ff" height="1" width="1" x="36" y="11" />
-          <!-- puente nariz -->
-          <rect fill="#c89078" height="1" width="1" x="34" y="13" />
-          <!-- boca -->
-          <rect fill="#8a5848" height="1" width="2" x="35" y="15" />
-
-          <!-- Aurora en mejilla -->
-          <rect fill="#ffa0b0" fill-opacity="0.35" height="1" width="2" x="34" y="14" />
-        </svg>
-        <img
-          src="./programador.gif"
-          alt=""
-          class="anna-intro__media-gif"
-          decoding="async"
-          onload="this.classList.add('is-loaded')"
-        />
-      </div>
-      <p class="anna-intro__cta anna-intro__cta--blink" id="anna-intro-cta">
-        &gt; SISTEMAS LISTOS. PRESIONA ENTER PARA INICIAR SECUENCIA_
-      </p>
-    </div>
-
-    <div id="anna-intro-phase2" class="anna-intro__phase2" aria-hidden="true">
-      <div class="anna-intro__stars" id="anna-intro-stars"></div>
-      <div class="anna-intro__vignette"></div>
-      <div id="anna-intro-rocket-mount" class="anna-intro__rocket-mount">
-        <div id="anna-intro-rocket-shake" class="anna-intro__rocket-shake">
-          <div class="anna-intro__media-box anna-intro__media-box--rocket">
-            <svg
-              class="anna-intro__pixel-svg anna-intro__pixel-svg--rocket"
-              viewBox="-12 -12 74 74"
-              preserveAspectRatio="xMidYMid meet"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-              shape-rendering="crispEdges"
-              focusable="false"
-            >
-              <title>Cohete pixel Anna-05 — dibujo vector propio</title>
-              <!-- Eje centrado sobre el fuselaje; −36° coincide con trayectoria de vuelo en intro -->
-              <g transform="translate(29,34) rotate(-36) translate(-16,-23)">
-                <!-- Cono -->
-                <rect fill="#2c3848" height="2" width="4" x="14" y="0" />
-                <rect fill="#f4f9ff" height="2" width="6" x="13" y="2" />
-                <rect fill="#dce8f8" height="3" width="8" x="12" y="4" />
-
-                <!-- Banda roja -->
-                <rect fill="#8f1524" height="4" width="14" x="9" y="8" />
-                <rect fill="#e82d42" height="3" width="12" x="10" y="9" />
-                <rect fill="#ffa0b8" fill-opacity="0.5" height="1" width="6" x="13" y="10" />
-
-                <!-- Fuselaje base + volumen lateral -->
-                <rect fill="#6b7c98" height="20" width="4" x="18" y="12" />
-                <rect fill="#8fa0bf" height="20" width="12" x="10" y="12" />
-
-                <!-- Alerones -->
-                <rect fill="#b81e2f" height="6" width="6" x="3" y="18" />
-                <rect fill="#7a141f" height="4" width="4" x="4" y="20" />
-                <rect fill="#b81e2f" height="6" width="6" x="24" y="18" />
-                <rect fill="#7a141f" height="4" width="4" x="25" y="20" />
-
-                <!-- Iluminación central (tapa cockpit al dibujarlo encima) -->
-                <rect fill="#cdd8ef" height="17" width="8" x="12" y="12" />
-
-                <!-- Cockpit -->
-                <rect fill="#0c2240" height="7" width="10" x="11" y="13" />
-                <rect fill="#34c8ec" height="5" width="8" x="12" y="14" />
-                <rect fill="#e8fbff" height="2" width="3" x="13" y="15" />
-                <rect fill="#184268" height="1" width="8" x="12" y="16" />
-
-                <!-- Franja clara característica -->
-                <rect fill="#f7fbff" height="2" width="10" x="11" y="24" />
-                <!-- Remaches / panel -->
-                <rect fill="#4d5f78" height="1" width="1" x="12" y="22" />
-                <rect fill="#4d5f78" height="1" width="1" x="19" y="22" />
-
-                <!-- Zona posterior + toberas -->
-                <rect fill="#4a5668" height="5" width="12" x="10" y="28" />
-                <rect fill="#2e3544" height="4" width="10" x="11" y="29" />
-                <rect fill="#5e6a82" height="1" width="10" x="11" y="28" />
-
-                <!-- Lanzallamas pixel (CSS) -->
-                <g class="anna-intro__rocket-flames" aria-hidden="true">
-                  <rect class="anna-intro__flame anna-intro__flame--1" fill="#ff8110" height="8" width="10" x="11" y="33" />
-                  <rect class="anna-intro__flame anna-intro__flame--2" fill="#ffcd36" height="11" width="8" x="12" y="34" />
-                  <rect class="anna-intro__flame anna-intro__flame--3" fill="#fff8dc" height="7" width="5" x="13" y="36" />
-                  <rect class="anna-intro__flame anna-intro__flame--4" fill="#ff4700" height="13" width="5" x="13" y="33" />
-                </g>
-              </g>
-            </svg>
-          </div>
+      <div class="anna-intro-pixel__stage">
+        <div id="anna-intro-pixel-layer">
+          <div class="anna-intro-pixel__lamp" aria-hidden="true"></div>
+          <img
+            src="intro-room-pixel-art.png"
+            class="anna-intro-pixel__img"
+            width="1024"
+            height="687"
+            alt=""
+            draggable="false"
+            decoding="async"
+          />
         </div>
       </div>
-    </div>
 
-    <p class="anna-intro__climax" id="anna-intro-msg" aria-live="polite"></p>
+      <div class="anna-intro__overlays" data-intro-overlays aria-live="polite"></div>
+      <div class="anna-intro-hypersplash" id="anna-intro-hypersplash" aria-hidden="true"></div>
+
+      <footer class="anna-intro__panel">
+        <p class="anna-intro__cta anna-intro__cta--blink" id="anna-intro-cta">
+          &gt; SISTEMAS LISTOS. PRESIONA ENTER PARA INICIAR SECUENCIA_
+        </p>
+      </footer>
+    </div>
   </div>
+
+  <script>
+    (function (w) {
+      "use strict";
+
+      /** No-op hasta intro-bootstrap → intro-cinematic(.js | -global.js) */
+      function noopDrain() {}
+
+      w.__AnnaIntroDrainKickMaybe =
+        typeof w.__AnnaIntroDrainKickMaybe === "function"
+          ? w.__AnnaIntroDrainKickMaybe
+          : noopDrain;
+
+      w.__AnnaIntroKickRequest = function () {
+        w.__annaIntroKickCount = (w.__annaIntroKickCount | 0) + 1;
+        w.__AnnaIntroDrainKickMaybe();
+      };
+
+      function introEl() {
+        return document.getElementById("anna-intro");
+      }
+
+      function bind() {
+        document.addEventListener(
+          "pointerdown",
+          function (ev) {
+            var intro = introEl();
+            if (!intro || !intro.isConnected) return;
+            var t = ev.target;
+            if (!(t instanceof Node) || !intro.contains(t)) return;
+            w.__AnnaIntroKickRequest();
+          },
+          true
+        );
+
+        document.addEventListener(
+          "click",
+          function (ev) {
+            var intro = introEl();
+            if (!intro || !intro.isConnected) return;
+            var t = ev.target;
+            if (!(t instanceof Node) || !intro.contains(t)) return;
+            w.__AnnaIntroKickRequest();
+          },
+          true
+        );
+
+        document.addEventListener(
+          "keydown",
+          function (ev) {
+            var intro = introEl();
+            if (!intro || !intro.isConnected) return;
+            if (ev.repeat) return;
+            if (ev.key === "Escape") return;
+            if (ev.ctrlKey || ev.altKey || ev.metaKey) return;
+            /** @type {Element | null} */
+            var ae = document.activeElement;
+            if (
+              ae instanceof HTMLInputElement ||
+              ae instanceof HTMLSelectElement ||
+              ae instanceof HTMLTextAreaElement ||
+              (ae instanceof HTMLElement && ae.isContentEditable)
+            ) {
+              return;
+            }
+            ev.preventDefault();
+            w.__AnnaIntroKickRequest();
+          },
+          true
+        );
+
+        document.addEventListener(
+          "keyup",
+          function (ev) {
+            var intro = introEl();
+            if (!intro || !intro.isConnected) return;
+            if (ev.repeat) return;
+            if (ev.key === "Escape") return;
+            if (ev.ctrlKey || ev.altKey || ev.metaKey) return;
+            /** @type {Element | null} */
+            var ae = document.activeElement;
+            if (
+              ae instanceof HTMLInputElement ||
+              ae instanceof HTMLSelectElement ||
+              ae instanceof HTMLTextAreaElement ||
+              (ae instanceof HTMLElement && ae.isContentEditable)
+            ) {
+              return;
+            }
+            ev.preventDefault();
+            w.__AnnaIntroKickRequest();
+          },
+          true
+        );
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bind);
+      } else {
+        bind();
+      }
+    })(window);
+  </script>
 
   <!-- Escritorio: fondo + iconos -->
   <main class="desktop" id="desktop" aria-label="Escritorio Anna OS">
@@ -204,11 +182,11 @@
       id="icon-cancion"
       role="button"
       tabindex="0"
-      aria-label="Abrir reproductor: nuestra_cancion.mp3"
+      aria-label="Abrir reproductor: Es Por Ti — Juanes"
       data-app="player"
     >
       <span class="desktop-icon__glyph desktop-icon__glyph--music" aria-hidden="true"></span>
-      <span class="desktop-icon__label">nuestra_cancion.mp3</span>
+      <span class="desktop-icon__label">Es Por Ti — Juanes</span>
     </div>
 
     <div
@@ -262,27 +240,19 @@
 
 Aquí hay un log rápido de todo lo que me encanta de ti:
 
+- Tu acento y esas palabras de México que poco a poco se me están pegando.
 
-Tu acento y esas palabras de México que poco a poco se me están pegando.
+- Cómo se te iluminan los ojos (o la voz) cuando me cuentas algo que te emociona.
 
+- Que haces que la distancia desde Perú se sienta como si estuvieras aquí a mi lado, en la misma habitación.
 
-Cómo se te iluminan los ojos (o la voz) cuando me cuentas algo que te emociona.
+- Tu paciencia infinita cuando me pongo en modo 'nerd' a programar.
 
+- Tu sentido del humor, que siempre logra sacarme de cualquier bug mental.
 
-Que haces que la distancia desde Perú se sienta como si estuvieras aquí a mi lado, en la misma habitación.
+- Tu sonrisa, que es literalmente el mejor render de todo mi día.
 
-
-Tu paciencia infinita cuando me pongo en modo 'nerd' a programar.
-
-
-Tu sentido del humor, que siempre logra sacarme de cualquier bug mental.
-
-
-Tu sonrisa, que es literalmente el mejor render de todo mi día.
-
-
-Eres el mejor 'commit' que he hecho en mi vida.
-
+- Eres el mejor 'commit' que he hecho en mi vida.
 
 Te amo, Anna.</textarea>
     </div>
@@ -300,13 +270,13 @@ Te amo, Anna.</textarea>
     hidden
   >
     <header class="window__titlebar" id="player-titlebar">
-      <span class="window__title" id="window-player-title">nuestra_cancion.mp3 — Reproductor</span>
+      <span class="window__title" id="window-player-title">Es Por Ti — Juanes — Reproductor</span>
       <button type="button" class="window__close" id="player-close" aria-label="Cerrar ventana">X</button>
     </header>
     <div class="window__body window__body--player">
-      <!-- El audio se carga en script.js con new Audio('nuestra_cancion.mp3') -->
+      <!-- Audio: script.js → Juanes - Es Por Ti.mp3 (encodeURI para espacios) -->
       <div class="player__panel">
-        <p class="player__song-title" id="player-song-label">Nuestra canción ♡</p>
+        <p class="player__song-title" id="player-song-label">Es Por Ti — Juanes ♡</p>
         <p class="player__meta" id="player-meta" aria-live="polite"></p>
         <div
           class="player__progress-wrap"
@@ -424,7 +394,7 @@ Te amo, Anna.</textarea>
     </div>
   </footer>
 
-  <script src="intro.js" defer></script>
+  <script src="intro.js" defer nomodule></script>
   <script src="script.js" defer></script>
 </body>
 </html>

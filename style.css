@@ -45,6 +45,9 @@
   /* Love Candles ($ANNA Tracker) — ApexCharts: coincide con la paleta retro-pastel del OS */
   --anna-candle-bull: #a8dfc4;
   --anna-candle-bear: #f2bdd4;
+
+  /* Intro cinematográfica: texto terminal sobre la pixel-room */
+  --anna-intro-accent: #88ffff;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1030,215 +1033,160 @@ body {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Intro Anna OS — pixel-art SVG incluido; GIF opcionales si están en la carpeta del proyecto */
+/* Intro Anna OS — Fase pixel + Three.js (GSAP orchestrado en intro-cinematic.js) */
 /* -------------------------------------------------------------------------- */
-
-:root {
-  --anna-intro-accent: #7af7b3;
-}
 
 .anna-intro {
   position: fixed;
   inset: 0;
   z-index: 2147483000;
-  background: #000000;
-  color: #dfffe8;
-  font-family: var(--font-mono), "VT323", "Consolas", monospace;
   overflow: hidden;
-  cursor: default;
+  cursor: pointer;
+  touch-action: manipulation;
+  outline: none;
+  pointer-events: auto;
+  background:
+    radial-gradient(ellipse 120% 100% at 50% -10%, rgba(36, 50, 80, 0.45) 0%, transparent 55%),
+    #05060c;
 }
 
-.anna-intro--spacebg {
-  background: radial-gradient(ellipse 120% 100% at 50% 120%, #0d1833 0%, #03060e 52%, #000000 100%);
+.anna-intro__scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
 }
 
-.anna-intro__flash {
-  pointer-events: none;
+#anna-intro-three-canvas {
   position: absolute;
   inset: 0;
-  z-index: 50;
-  background: #ffffff;
-  opacity: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+  pointer-events: none;
 }
 
-.anna-intro__phase1 {
-  position: relative;
-  z-index: 10;
+/* Habitación pixel + bruma cálida sobre la lámpara */
+.anna-intro-pixel__stage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(14px, 3vh, 24px);
-  min-height: 100%;
+  padding: clamp(12px, 3vh, 28px);
+  gap: clamp(12px, 2.5vh, 22px);
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+/* Capa clickable pasa-through - root captura clic / teclado */
+.anna-intro-pixel__stage button,
+.anna-intro-pixel__stage a {
+  pointer-events: auto;
+}
+
+#anna-intro-pixel-layer {
+  position: relative;
+  width: min(920px, 94vw);
+  max-width: 100%;
+  border: solid 3px rgba(140, 120, 100, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.85),
+    0 26px 64px rgba(0, 0, 0, 0.75),
+    inset 0 0 40px rgba(255, 200, 120, 0.08);
+  background: radial-gradient(circle at 22% 40%, rgba(255, 200, 120, 0.18), transparent 45%) #070810;
+  border-radius: 2px;
+  transform: translateZ(0);
+}
+
+.anna-intro-pixel__lamp {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 42% 35% at 28% 36%,
+    rgba(255, 210, 140, 0.28),
+    transparent 72%
+  );
+  mix-blend-mode: soft-light;
+  z-index: 1;
+}
+
+.anna-intro-pixel__img {
+  position: relative;
+  z-index: 0;
+  display: block;
   width: 100%;
-  padding: 24px 16px;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  vertical-align: top;
+}
+
+.anna-intro__panel {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: clamp(12px, 3vh, 28px);
+  gap: clamp(10px, 2vh, 18px);
+  pointer-events: none;
   box-sizing: border-box;
 }
 
-/* Cajas media: SVG dibujado; programador.gif encima sólo si carga (.is-loaded). */
-.anna-intro__media-box {
-  position: relative;
-  display: grid;
-  place-items: center;
-  overflow: visible;
-}
-
-.anna-intro__media-box--dev {
-  width: min(340px, 78vw);
-  max-height: min(52vh, 440px);
-  aspect-ratio: 48 / 36;
-  border: solid 4px #1a2840;
-  box-shadow:
-    6px 6px 0 #0f1828,
-    0 16px 40px rgba(0, 0, 0, 0.85);
-  background: #0f1424;
-}
-
-.anna-intro__pixel-svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  max-height: inherit;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  flex-shrink: 0;
-}
-
-/* GIF encima cuando carga bien */
-.anna-intro__media-gif {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.anna-intro__media-gif.is-loaded {
-  opacity: 1;
-  visibility: visible;
-}
-
-.anna-intro__media-box--dev .anna-intro__pixel-svg {
-  position: relative;
-  z-index: 1;
-}
-
-.anna-intro__media-box--dev .anna-intro__media-gif {
-  z-index: 2;
-}
-
-.anna-intro__media-box--rocket {
-  width: min(220px, 42vw);
-  height: auto;
-  min-height: min(36vh, 280px);
-  background: transparent;
-}
-
-.anna-intro__media-box--rocket .anna-intro__pixel-svg--rocket {
-  position: relative;
-  z-index: 1;
-  min-height: 180px;
-  width: 100%;
-  height: auto;
-  filter: drop-shadow(0 0 16px rgba(255, 120, 60, 0.3));
-}
-
-.anna-intro__phase2 {
+.anna-intro__overlays {
   position: absolute;
   inset: 0;
   z-index: 5;
-  opacity: 0;
-  visibility: hidden;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(30, 60, 120, 0.35) 0%, transparent 45%),
-    linear-gradient(180deg, #040a14 0%, #020510 65%, #000208 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(12px, 4vw, 36px);
+  pointer-events: none;
+  gap: clamp(10px, 2vh, 16px);
+  box-sizing: border-box;
 }
 
-.anna-intro__stars {
+.anna-intro__love-overlay-line {
+  max-width: min(620px, 88vw);
+  margin: 0;
+  padding: 12px 16px;
+  font-family: var(--font-pixel), "Press Start 2P", monospace;
+  font-size: clamp(7px, 1.62vw, 10px);
+  line-height: 1.92;
+  color: #f8f4ff;
+  text-shadow:
+    0 0 18px rgba(180, 150, 255, 0.55),
+    2px 2px 0 #1a0828;
+  background: rgba(8, 4, 20, 0.38);
+  border: 2px solid rgba(200, 140, 255, 0.35);
+}
+
+.anna-intro-hypersplash {
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  opacity: 0;
-  z-index: 1;
-}
-
-.anna-intro__phase2.is-stars-visible .anna-intro__stars {
-  opacity: 1;
-}
-
-.anna-intro__star {
-  position: absolute;
-  top: 0;
-  left: 0;
+  margin: auto;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow:
-    0 0 2px rgba(255, 255, 255, 0.9),
-    0 0 6px rgba(160, 200, 255, 0.45);
-}
-
-.anna-intro__vignette {
   pointer-events: none;
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background: radial-gradient(ellipse 70% 62% at 50% 48%, transparent 38%, rgba(0, 0, 4, 0.72) 100%);
-  opacity: 0.5;
-}
-
-.anna-intro__rocket-mount {
-  position: absolute;
-  z-index: 4;
-  left: 6%;
-  bottom: 8%;
-  top: auto;
-  pointer-events: none;
-  will-change: transform, left, top, bottom;
-}
-
-.anna-intro__rocket-shake {
-  transform-origin: 50% 50%;
-}
-
-/* Llamas del cohete: animación sólo CSS (servible en GitHub Pages). */
-@keyframes anna-intro-flame-flick {
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.28;
-  }
-}
-
-.anna-intro__rocket-flames .anna-intro__flame--1 {
-  animation: anna-intro-flame-flick 0.2s steps(2, end) infinite;
-}
-
-.anna-intro__rocket-flames .anna-intro__flame--2 {
-  animation: anna-intro-flame-flick 0.28s steps(2, end) infinite 0.05s reverse;
-}
-
-.anna-intro__rocket-flames .anna-intro__flame--3 {
-  animation: anna-intro-flame-flick 0.22s steps(2, end) infinite 0.12s;
-}
-
-.anna-intro__rocket-flames .anna-intro__flame--4 {
-  animation: anna-intro-flame-flick 0.18s steps(2, end) infinite 0.02s reverse;
+  visibility: hidden;
+  z-index: 10;
+  background: radial-gradient(circle at 50% 48%, #ffffff 28%, rgba(248, 252, 255, 0.97) 62%, rgba(220, 236, 255, 1) 100%);
 }
 
 .anna-intro__cta {
   margin: 0;
+  pointer-events: none;
   max-width: min(920px, 94vw);
-  padding: 0 8px;
+  padding: 10px 12px;
   font-family: var(--font-pixel), "Press Start 2P", monospace;
   font-size: clamp(0.48rem, 1.82vw, 0.62rem);
   line-height: 1.92;
@@ -1269,29 +1217,6 @@ body {
 
 .anna-intro__cta--blink {
   animation: anna-intro-blink 2.25s ease-in-out infinite;
-}
-
-.anna-intro__climax {
-  position: absolute;
-  z-index: 40;
-  bottom: clamp(72px, 14vh, 120px);
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: min(88vw, 560px);
-  margin: 0;
-  padding: 0 12px;
-  font-family: var(--font-pixel), "Press Start 2P", monospace;
-  font-size: clamp(0.55rem, 2.2vw, 0.74rem);
-  line-height: 2;
-  text-align: center;
-  white-space: pre-wrap;
-  color: #fff5fb;
-  text-shadow:
-    0 0 12px rgba(255, 200, 255, 0.35),
-    2px 2px 0 #2d1f3d;
-  min-height: 4em;
-  opacity: 0;
-  visibility: hidden;
 }
 
 html.anna-intro--active,

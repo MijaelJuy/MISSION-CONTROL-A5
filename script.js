@@ -2,7 +2,7 @@
  * Anna OS — lógica principal (Vanilla JS)
  * - Reloj
  * - Gestión de ventanas (abrir / cerrar / arrastre / z-index)
- * - Reproductor: objeto Audio (JS) → nuestra_cancion.mp3
+ * - Reproductor: objeto Audio (JS) → Juanes - Es Por Ti.mp3
  * - $ANNA Tracker (ApexCharts Love Candles + confeti)
  */
 
@@ -509,7 +509,9 @@ function setWindowVisible(windowEl, visible) {
   // Reproductor de música (archivo local vía Audio API; sin <audio> en el HTML)
   // ---------------------------------------------------------------------------
 
-  const PLAYER_TRACK_SRC = "nuestra_cancion.mp3";
+  /** Nombre del archivo en la carpeta del proyecto (debe coincidir con el MP3 real). */
+  const PLAYER_TRACK_FILE = "Juanes - Es Por Ti.mp3";
+  const PLAYER_TRACK_SRC = encodeURI(PLAYER_TRACK_FILE);
 
   function formatTime(sec) {
     if (!Number.isFinite(sec) || sec < 0) return "0:00";
@@ -569,7 +571,8 @@ function setWindowVisible(windowEl, visible) {
         if (p && typeof p.catch === "function") {
           p.catch(function () {
             if (metaEl) {
-              metaEl.textContent = "Añade nuestra_cancion.mp3 junto a index.html";
+              metaEl.textContent =
+                "Coloca «" + PLAYER_TRACK_FILE + "» junto a index.html";
             }
           });
         }
