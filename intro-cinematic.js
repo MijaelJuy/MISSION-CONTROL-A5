@@ -12,7 +12,7 @@ window.__AnnaIntroDrainKickMaybe =
     : function () {};
 
 const LOVE_LINES = [
-  "Iniciando secuencia de acoplamiento a la galaxia de Ruth...",
+  "Iniciando secuencia de acoplamiento a la galaxia de Anna...",
   'La gravedad de un agujero negro no es nada comparada con la fuerza con la que me atraes.',
   "Órbita estable. Sistemas de soporte vital al 100%... igual que mi amor por ti.",
   "Acelerando a velocidad de escape en 3, 2, 1...",

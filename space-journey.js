@@ -27,96 +27,146 @@ export function createAnnaSpaceJourney(canvas, opts = {}) {
   scene.add(new THREE.HemisphereLight(0xa8bff5, 0x120814, 0.42));
   scene.add(new THREE.DirectionalLight(0xffffff, 0.18));
 
-  const camera = new THREE.PerspectiveCamera(56, 1, 0.12, 4000);
+  const camera = new THREE.PerspectiveCamera(54, 1, 0.12, 4000);
 
-  /** Cohete + cámara: nariz → etapas → tobera → llamas + 4 aletas (popa +Z, vuelo hacia -Z). */
+  /** Cohete mejorado: cuerpo alto, SRB gemelos, sonda punta-cabina y anillos. +Z es popa. */
+  const srbFlameMeshes = [];
   const rocketGroup = new THREE.Group();
   scene.add(rocketGroup);
 
+  const seg = 30;
+
   const hullMat = new THREE.MeshStandardMaterial({
-    color: 0xc8d4e8,
-    roughness: 0.32,
-    metalness: 0.48,
-    emissive: 0x0a1020,
-    emissiveIntensity: 0.12,
+    color: 0xbfd2ec,
+    roughness: 0.28,
+    metalness: 0.52,
+    emissive: 0x0a1628,
+    emissiveIntensity: 0.1,
   });
   const darkHullMat = new THREE.MeshStandardMaterial({
-    color: 0x4a5668,
-    roughness: 0.48,
-    metalness: 0.62,
+    color: 0x3d4858,
+    roughness: 0.44,
+    metalness: 0.58,
     emissive: 0x060812,
-    emissiveIntensity: 0.06,
+    emissiveIntensity: 0.05,
   });
   const stripeMat = new THREE.MeshStandardMaterial({
-    color: 0xb01028,
-    roughness: 0.42,
-    metalness: 0.22,
+    color: 0xa80e26,
+    roughness: 0.38,
+    metalness: 0.26,
   });
   const nozzleMat = new THREE.MeshStandardMaterial({
-    color: 0x2f3848,
-    roughness: 0.38,
-    metalness: 0.82,
-    emissive: 0x0a121c,
-    emissiveIntensity: 0.12,
+    color: 0x293244,
+    roughness: 0.34,
+    metalness: 0.84,
+    emissive: 0x081018,
+    emissiveIntensity: 0.14,
+  });
+  const glassMat = new THREE.MeshStandardMaterial({
+    color: 0x173c72,
+    metalness: 0.76,
+    roughness: 0.18,
+    transparent: true,
+    opacity: 0.68,
+    emissive: 0x082450,
+    emissiveIntensity: 0.62,
+    side: THREE.DoubleSide,
+  });
+  const probeMat = new THREE.MeshStandardMaterial({
+    color: 0xd0dcf0,
+    metalness: 0.74,
+    roughness: 0.22,
+    emissive: 0x080c14,
+    emissiveIntensity: 0.06,
   });
 
-  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.36, 2.05, 22), hullMat);
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.33, 1.98, seg), hullMat);
   nose.rotation.x = -Math.PI / 2;
-  nose.position.z = -2.82;
+  nose.position.z = -2.68;
+
+  const dockingProbe = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.085, 0.62, 12), probeMat);
+  dockingProbe.rotation.x = Math.PI / 2;
+  dockingProbe.position.z = -3.92;
+
+  const probeBall = new THREE.Mesh(new THREE.SphereGeometry(0.085, 14, 12), probeMat);
+  probeBall.position.z = -4.26;
 
   const capsuleRing = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.36, 0.48, 0.48, 22),
+    new THREE.CylinderGeometry(0.33, 0.455, 0.46, seg),
     stripeMat
   );
   capsuleRing.rotation.x = Math.PI / 2;
-  capsuleRing.position.z = -1.72;
+  capsuleRing.position.z = -1.58;
 
   const upperStage = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.48, 0.56, 1.42, 22),
+    new THREE.CylinderGeometry(0.455, 0.535, 1.48, seg),
     hullMat
   );
   upperStage.rotation.x = Math.PI / 2;
-  upperStage.position.z = -0.95;
+  upperStage.position.z = -0.76;
+
+  const cockpitDome = new THREE.Mesh(
+    new THREE.SphereGeometry(
+      0.3,
+      seg,
+      Math.max(14, Math.floor(seg * 0.55)),
+      0,
+      Math.PI * 2,
+      0,
+      Math.PI * 0.46
+    ),
+    glassMat
+  );
+  cockpitDome.rotation.x = -Math.PI / 2;
+  cockpitDome.position.set(0.2, 0.44, -0.94);
 
   const stripeRing = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.56, 0.56, 0.32, 22, 1, true),
+    new THREE.CylinderGeometry(0.535, 0.535, 0.3, seg, 1, true),
     stripeMat
   );
   stripeRing.rotation.x = Math.PI / 2;
-  stripeRing.position.z = -0.12;
+  stripeRing.position.z = 0.02;
 
   const coreStage = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.56, 0.72, 2.18, 22),
+    new THREE.CylinderGeometry(0.535, 0.695, 2.35, seg),
     hullMat
   );
   coreStage.rotation.x = Math.PI / 2;
-  coreStage.position.z = 1.05;
+  coreStage.position.z = 1.2;
+
+  const sepRingGeo = new THREE.TorusGeometry(0.597, 0.032, 8, Math.max(seg, 36));
+
+  const sepRingA = new THREE.Mesh(sepRingGeo, nozzleMat);
+  sepRingA.position.z = 0.18;
+
+  const sepRingB = new THREE.Mesh(sepRingGeo.clone(), nozzleMat);
+  sepRingB.position.z = 1.92;
 
   const boosterSkirt = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.72, 0.78, 0.78, 22),
+    new THREE.CylinderGeometry(0.695, 0.752, 0.82, seg),
     darkHullMat
   );
   boosterSkirt.rotation.x = Math.PI / 2;
-  boosterSkirt.position.z = 2.36;
+  boosterSkirt.position.z = 2.52;
 
   const nozzle = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.54, 0.34, 0.52, 22),
+    new THREE.CylinderGeometry(0.52, 0.32, 0.55, seg),
     nozzleMat
   );
   nozzle.rotation.x = Math.PI / 2;
-  nozzle.position.z = 2.84;
+  nozzle.position.z = 3.02;
 
   const nozzleHole = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.26, 0.2, 0.58, 16),
-    new THREE.MeshBasicMaterial({ color: 0x030408 })
+    new THREE.CylinderGeometry(0.24, 0.18, 0.62, 16),
+    new THREE.MeshBasicMaterial({ color: 0x020408 })
   );
   nozzleHole.rotation.x = Math.PI / 2;
-  nozzleHole.position.z = 2.86;
+  nozzleHole.position.z = 3.04;
 
   const flameOuterMat = new THREE.MeshBasicMaterial({
-    color: 0xff6324,
+    color: 0xff5a1c,
     transparent: true,
-    opacity: 0.52,
+    opacity: 0.5,
     depthWrite: false,
   });
   const flameMidMat = new THREE.MeshBasicMaterial({
@@ -133,58 +183,109 @@ export function createAnnaSpaceJourney(canvas, opts = {}) {
   });
 
   const flameOuter = new THREE.Mesh(
-    new THREE.ConeGeometry(0.72, 2.05, 18, 1, true),
+    new THREE.ConeGeometry(0.74, 2.15, 22, 1, true),
     flameOuterMat
   );
   flameOuter.rotation.x = Math.PI / 2;
-  flameOuter.position.z = 3.58;
+  flameOuter.position.z = 3.72;
 
   const flameMid = new THREE.Mesh(
-    new THREE.ConeGeometry(0.42, 1.42, 16, 1, true),
+    new THREE.ConeGeometry(0.44, 1.48, 18, 1, true),
     flameMidMat
   );
   flameMid.rotation.x = Math.PI / 2;
-  flameMid.position.z = 3.28;
+  flameMid.position.z = 3.42;
 
   const flameCore = new THREE.Mesh(
-    new THREE.ConeGeometry(0.22, 1.02, 12, 1, true),
+    new THREE.ConeGeometry(0.21, 1.05, 14, 1, true),
     flameCoreMat
   );
   flameCore.rotation.x = Math.PI / 2;
-  flameCore.position.z = 3.05;
+  flameCore.position.z = 3.18;
 
   const glow = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 18, 18),
+    new THREE.SphereGeometry(0.52, 22, 20),
     new THREE.MeshBasicMaterial({
-      color: 0xff8538,
+      color: 0xff7a30,
       transparent: true,
-      opacity: 0.86,
+      opacity: 0.84,
       depthWrite: false,
     })
   );
-  glow.position.z = 2.76;
+  glow.position.z = 2.88;
 
   function fin(dx, dy, rotZ, rotX) {
     const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(0.68, 0.14, 0.98),
+      new THREE.BoxGeometry(0.76, 0.12, 1.05),
       stripeMat
     );
-    mesh.position.set(dx * 0.79, dy * 0.79, 1.88);
+    mesh.position.set(dx * 0.82, dy * 0.82, 1.96);
     mesh.rotation.z = rotZ;
     mesh.rotation.x = rotX;
     return mesh;
   }
-  const finW = fin(-1, 0, -0.58, 0.09);
-  const finE = fin(1, 0, 0.58, 0.09);
-  const finN = fin(0, 1, 0, -0.62);
-  const finS = fin(0, -1, 0, 0.62);
+  const finW = fin(-1, 0, -0.56, 0.1);
+  const finE = fin(1, 0, 0.56, 0.1);
+  const finN = fin(0, 1, 0, -0.6);
+  const finS = fin(0, -1, 0, 0.6);
+
+  function attachSRB(sideSign) {
+    const root = new THREE.Group();
+    const body = new THREE.Mesh(
+      new THREE.CapsuleGeometry(0.265, 1.68, 4, Math.max(14, Math.floor(seg * 0.65))),
+      darkHullMat
+    );
+    body.rotation.x = Math.PI / 2;
+    body.position.z = 0.82;
+    const srbNose = new THREE.Mesh(new THREE.ConeGeometry(0.265, 0.58, 16), hullMat);
+    srbNose.rotation.x = -Math.PI / 2;
+    srbNose.position.z = -0.36;
+    const srbBand = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.29, 0.29, 0.22, 14, 1, true),
+      stripeMat
+    );
+    srbBand.rotation.x = Math.PI / 2;
+    srbBand.position.z = 0.22;
+    const srbBell = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.27, 0.18, 0.34, 14),
+      nozzleMat
+    );
+    srbBell.rotation.x = Math.PI / 2;
+    srbBell.position.z = 2.04;
+    const sFlame = new THREE.Mesh(
+      new THREE.ConeGeometry(0.32, 0.92, 14, 1, true),
+      flameOuterMat
+    );
+    sFlame.rotation.x = Math.PI / 2;
+    sFlame.position.z = 2.58;
+    srbFlameMeshes.push(sFlame);
+    root.add(body, srbNose, srbBand, srbBell, sFlame);
+    root.position.set(sideSign * 1.02, -0.04, -0.06);
+    root.rotation.z = sideSign * 0.2;
+    rocketGroup.add(root);
+  }
+  attachSRB(-1);
+  attachSRB(1);
+
+  const strutGeo = new THREE.BoxGeometry(0.38, 0.09, 0.13);
+  const strutL = new THREE.Mesh(strutGeo, hullMat);
+  strutL.position.set(-0.5, 0.16, 0.42);
+  strutL.rotation.z = 0.38;
+  const strutR = new THREE.Mesh(strutGeo.clone(), hullMat);
+  strutR.position.set(0.5, 0.16, 0.42);
+  strutR.rotation.z = -0.38;
 
   rocketGroup.add(
     nose,
+    dockingProbe,
+    probeBall,
     capsuleRing,
     upperStage,
+    cockpitDome,
     stripeRing,
     coreStage,
+    sepRingA,
+    sepRingB,
     boosterSkirt,
     nozzle,
     nozzleHole,
@@ -195,22 +296,22 @@ export function createAnnaSpaceJourney(canvas, opts = {}) {
     finW,
     finE,
     finN,
-    finS
+    finS,
+    strutL,
+    strutR
   );
 
-  /** Cabina un poco atrás para ver nariz + fuselaje en encuadre */
-  camera.position.set(0.26, 0.44, 0.72);
-  camera.fov = 56;
+  camera.position.set(0.34, 0.48, 0.76);
+  camera.fov = 54;
   camera.updateProjectionMatrix();
-  camera.lookAt(0, 0.06, -26);
+  camera.lookAt(0.02, 0.08, -24);
   rocketGroup.add(camera);
 
-  /** Luces locales */
-  const hullLight = new THREE.PointLight(0xff9644, 1.85, 14, 1.85);
+  const hullLight = new THREE.PointLight(0xff9644, 1.9, 14, 1.85);
   hullLight.position.copy(glow.position);
   rocketGroup.add(hullLight);
-  const cockpitLight = new THREE.PointLight(0xa8dcff, 1.05, 10, 1.55);
-  cockpitLight.position.set(0.06, 0.14, -1.35);
+  const cockpitLight = new THREE.PointLight(0xa8dcff, 1.15, 10, 1.55);
+  cockpitLight.position.set(0.1, 0.36, -1.12);
   rocketGroup.add(cockpitLight);
 
   /** Curva tipo “misión orbital” pasando objetos cercanos */
@@ -284,7 +385,7 @@ export function createAnnaSpaceJourney(canvas, opts = {}) {
     };
     const [a, b] = palettes[hueName] || ["#aab5c9", "#6f7a93"];
     const mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(radius, 28, 28),
+      new THREE.SphereGeometry(radius, 40, 40),
       new THREE.MeshStandardMaterial({
         map: canvasNoiseTexture(a, b, 26),
         roughness: 0.98,
@@ -433,15 +534,20 @@ export function createAnnaSpaceJourney(canvas, opts = {}) {
     rocketGroup.lookAt(lookPt.x, lookPt.y, lookPt.z);
     rocketGroup.rotateZ(Math.sin(elapsed * 17) * 0.062 * warpIn);
 
-    camera.fov = THREE.MathUtils.lerp(56, 82, warpIn * warpIn);
+    camera.fov = THREE.MathUtils.lerp(54, 82, warpIn * warpIn);
     camera.updateProjectionMatrix();
 
-    hullLight.intensity = THREE.MathUtils.lerp(1.85, 4.2, hyp);
+    hullLight.intensity = THREE.MathUtils.lerp(1.9, 4.35, hyp);
     const flBoost = 1 + hyp * 2.85;
     flameOuter.scale.setScalar(flBoost * (1 + Math.sin(elapsed * 31) * 0.06 * hyp));
     flameMid.scale.setScalar(flBoost * 1.08);
     flameCore.scale.setScalar(flBoost * 1.15);
     glow.scale.setScalar(1 + hyp * 1.35);
+    srbFlameMeshes.forEach(function (sm) {
+      sm.scale.setScalar(
+        flBoost * 0.88 * (1 + Math.sin(elapsed * 33) * 0.05 * hyp)
+      );
+    });
 
     renderer.render(scene, camera);
 
@@ -466,13 +572,16 @@ export function createAnnaSpaceJourney(canvas, opts = {}) {
     elapsed = 0;
     state.progress = 0;
     tick.__prev = null;
-    camera.fov = 56;
+    camera.fov = 54;
     camera.updateProjectionMatrix();
-    hullLight.intensity = 1.85;
+    hullLight.intensity = 1.9;
     flameOuter.scale.setScalar(1);
     flameMid.scale.setScalar(1);
     flameCore.scale.setScalar(1);
     glow.scale.setScalar(1);
+    srbFlameMeshes.forEach(function (sm) {
+      sm.scale.setScalar(1);
+    });
     fitSize();
     rafId = window.requestAnimationFrame(tick);
   }
